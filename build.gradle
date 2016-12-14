@@ -1,0 +1,61 @@
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'com.google.protobuf'
+apply plugin: 'gradle-one-jar'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.0'
+        classpath 'com.github.rholder:gradle-one-jar:1.0.4'
+    }
+}
+
+sourceSets {
+    main {
+        proto {
+            srcDir 'src/main/proto'
+        }
+        java {
+            srcDirs = ['src/main/java', 'generated-sources/main/java']
+        }
+    }
+}
+
+dependencies {
+    compile 'com.google.protobuf:protobuf-java:3.0.0'
+
+    compile group: 'com.google.protobuf', name: 'protobuf-gradle-plugin', version: '0.8.0'
+    compile group: 'commons-io', name: 'commons-io', version: '2.5'
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    // lombok
+    compileOnly 'org.projectlombok:lombok:1.16.10'
+}
+
+task local(type: OneJar) {
+    mainClass = 'Main'
+    archiveName = 'launcher.jar'
+}
+
+//task localController(type: OneJar) {
+//    mainClass = 'ru.spbau.mit.GUI.Controller'
+//    archiveName = 'client.jar'
+//}
+
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.0.0'
+    }
+    generateProtoTasks.generatedFilesBaseDir = 'generated-sources'
+}
+
