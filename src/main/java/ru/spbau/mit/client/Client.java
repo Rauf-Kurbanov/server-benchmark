@@ -2,50 +2,54 @@ package ru.spbau.mit.client;
 
 //import ru.spbau.mit.server.MultiThreadedServer;
 
-import ru.mit.spbau.FlyingDataProtos;
+import lombok.RequiredArgsConstructor;
 import ru.spbau.mit.Sorter;
-import ru.spbau.mit.server.ThreadPooledServer;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.Socket;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
-public class Client {
+@RequiredArgsConstructor
+public class Client implements Runnable {
 
-//    private static final int portNumber = 8080;
+    private final int n;
+    private final int portNumber;
+    private final Socket socket;
 
-    public static void main(String[] args) throws IOException {
-        final ThreadPooledServer tps = new ThreadPooledServer();
-        tps.start();
-        final Socket socket = new Socket("localhost", tps.getCurrentPort());
+    private final DataInputStream in;
+    private final DataOutputStream out;
 
-        final DataInputStream in = new DataInputStream(socket.getInputStream());
-        final DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+    // TODO localhost -> host
+    public Client(int portNumber, int n) throws IOException {
+        this.n = n;
+        this.portNumber = portNumber;
+        socket = new Socket("localhost", portNumber);
 
-        int[] arrToSort = Sorter.generateArr(10);
-        List<Integer> iterable = IntStream.of(arrToSort).boxed().collect(Collectors.toList());
-        final FlyingDataProtos.FlyingData fd = FlyingDataProtos.FlyingData
-                .newBuilder().addAllValue(iterable).build();
+        in = new DataInputStream(socket.getInputStream());
+        out = new DataOutputStream(socket.getOutputStream());
+    }
 
-        out.writeByte(1);
-        out.writeInt(fd.getSerializedSize());
-        out.write(fd.toByteArray());
+    public List<Integer> askToSort() throws IOException {
+        final int[] arrToSort = Sorter.generateArr(n);
+        Protocol.sendSortRequest(out, arrToSort);
+        final List<Integer> res = Protocol.getSortResponse(in);
+        return res;
+    }
 
-        final int serializedSize  = in.readInt();
-        byte[] content = new byte[serializedSize];
-        in.readFully(content);
-        final FlyingDataProtos.FlyingData newFd = FlyingDataProtos.FlyingData.parseFrom(content);
-        final List<Integer> values = fd.getValueList();
-        int[] array = values.stream().mapToInt(x->x).toArray();
-
+    public void stop() throws IOException {
         out.close();
         in.close();
-        tps.stop();
+        socket.close();
+    }
 
-        Arrays.stream(array).forEach(x -> System.out.println());
+    public static void main(String[] args) throws IOException {
+    }
+
+    @Override
+    public void run() {
+
     }
 }
 

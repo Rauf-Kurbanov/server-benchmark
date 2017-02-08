@@ -3,6 +3,7 @@ package ru.spbau.mit;
 import java.util.Arrays;
 import java.util.Random;
 
+// TODO separate responsibilities for generating input and sorting
 public class Sorter {
 
     public static void insertionSort(int[] arr) {
