@@ -9,15 +9,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @RequiredArgsConstructor
-public class ThreadPooledServer implements Server {
+public class ThreadPooledServer extends Server {
 
-    private final ExecutorService serverThreadExecutor = Executors.newSingleThreadExecutor();
+//    private final ExecutorService serverThreadExecutor = Executors.newSingleThreadExecutor();
     private final ExecutorService executor = Executors.newCachedThreadPool();
     private ServerSocket serverSocket;
     private final RequestAnswerer requestAnswerer = new RequestAnswerer();
 
     // why synchronized?
-    private void runServer(int portNumber) throws IOException {
+    @Override
+    protected void runServer(int portNumber) throws IOException {
         serverSocket = new ServerSocket(portNumber);
         while (!serverSocket.isClosed()) {
             try {
@@ -30,30 +31,21 @@ public class ThreadPooledServer implements Server {
                     }
                 });
             } catch (IOException e) {
-                System.out.println("Cannot open client socket");
+                System.err.println("Can't answer server sequest");
+                System.err.println(e.getMessage());
             }
         }
     }
 
     @Override
-    public void start(int portNumber) {
-        serverThreadExecutor.execute(() -> {
-            try {
-                runServer(portNumber);
-            } catch (IOException e) {
-                throw new RuntimeException("Can't start server", e);
-            }
-        });
-    }
-
-    @Override
-    public void stop() {
+    public void stop() throws IOException {
+        super.stop();
         try {
             serverSocket.close();
         } catch (IOException e) {
             throw new RuntimeException("Error closing server", e);
         }
         executor.shutdownNow();
-        serverThreadExecutor.shutdownNow();
+//        serverThreadExecutor.shutdownNow();
     }
 }

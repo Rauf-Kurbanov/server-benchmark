@@ -3,15 +3,14 @@ package ru.spbau.mit.server.tcp;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-public class SingleThreadServer implements Server {
-    private final ExecutorService serverThreadExecutor = Executors.newSingleThreadExecutor();
+public class SingleThreadServer extends Server {
+//    private final ExecutorService serverThreadExecutor = Executors.newSingleThreadExecutor();
     private ServerSocket serverSocket;
     private final RequestAnswerer requestAnswerer = new RequestAnswerer();
 
-    private synchronized void runServer(int portNumber) throws IOException {
+    @Override
+    protected void runServer(int portNumber) throws IOException {
         serverSocket = new ServerSocket(portNumber);
         while (!serverSocket.isClosed()) {
             try {
@@ -24,23 +23,13 @@ public class SingleThreadServer implements Server {
     }
 
     @Override
-    public void start(int portNumber) {
-        serverThreadExecutor.execute(() -> {
-            try {
-                runServer(portNumber);
-            } catch (IOException e) {
-                throw new RuntimeException("Can't start server", e);
-            }
-        });
-    }
-
-    @Override
-    public void stop() {
+    public void stop() throws IOException {
+        super.stop();
         try {
             serverSocket.close();
         } catch (IOException e) {
             throw new RuntimeException("Error closing server", e);
         }
-        serverThreadExecutor.shutdownNow();
+//        serverThreadExecutor.shutdownNow();
     }
 }

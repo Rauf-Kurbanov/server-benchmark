@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+// TODO split tcp and udp protocols
 public interface Protocol {
 
     int MAX_MESSAGE_SIZE = 10 * 1024;

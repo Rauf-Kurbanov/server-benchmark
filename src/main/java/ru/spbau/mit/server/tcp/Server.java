@@ -1,12 +1,30 @@
 package ru.spbau.mit.server.tcp;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-public interface Server {
+public abstract class Server {
 
-    // TODO synchronized?
-    // TODO add default implementation
-    void start(int portNumber) throws IOException;
+    private final ExecutorService serverThreadExecutor = Executors.newSingleThreadExecutor();
 
-    void stop() throws IOException;
+    public void start(int portNumber) {
+        serverThreadExecutor.execute(() -> {
+            try {
+                runServer(portNumber);
+                // TODO
+            } catch (IOException e) {
+                System.err.println("Trying to run server on port " + portNumber);
+                System.err.println(e.getMessage());
+//                e.printStackTrace();
+            }
+        });
+    }
+
+    public void stop() throws IOException {
+        serverThreadExecutor.shutdownNow();
+    }
+
+    // TODO runServer -> Worker
+    protected abstract void runServer(int portNumber) throws IOException ;
 }

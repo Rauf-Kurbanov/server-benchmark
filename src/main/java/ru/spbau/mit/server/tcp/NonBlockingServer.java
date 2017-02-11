@@ -17,9 +17,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Slf4j
-public class NonBlockingServer implements Server {
+public class NonBlockingServer extends Server {
 
-    private final ExecutorService serverThreadExecutor = Executors.newSingleThreadExecutor();
+//    private final ExecutorService serverThreadExecutor = Executors.newSingleThreadExecutor();
     private static final int THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors() + 1;
     private final ExecutorService myThreadPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
     private Selector selector;
@@ -29,20 +29,7 @@ public class NonBlockingServer implements Server {
     private final RequestAnswerer requestAnswerer = new RequestAnswerer();
 
     @Override
-    public void start(int portNumber) {
-        serverThreadExecutor.execute(() -> {
-            try {
-                runServer(portNumber);
-                // TODO
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-    }
-
-    // TODO place into the parent class
-    private void runServer(int portNumber) throws IOException {
-        log.info("something");
+    protected void runServer(int portNumber) throws IOException {
         selector = Selector.open();
 
         serverSocketChannel = ServerSocketChannel.open();
@@ -153,6 +140,7 @@ public class NonBlockingServer implements Server {
 
     @Override
     public void stop() throws IOException {
+        super.stop();
         if (serverSocketChannel != null) {
             serverSocketChannel.close();
             serverSocketChannel.socket().close();

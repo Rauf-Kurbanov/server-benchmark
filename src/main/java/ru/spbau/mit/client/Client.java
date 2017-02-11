@@ -1,55 +1,22 @@
 package ru.spbau.mit.client;
 
-//import ru.spbau.mit.server.MultiThreadedServer;
-
-import lombok.RequiredArgsConstructor;
-import ru.spbau.mit.Sorter;
-
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.Socket;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
-@RequiredArgsConstructor
-public class Client implements Runnable {
+public abstract class Client {
 
-    private final int n;
-    private final int portNumber;
-    private final Socket socket;
+    protected int nQueries;
+    protected int delayInMs;
 
-    private final DataInputStream in;
-    private final DataOutputStream out;
+    public abstract List<Integer> askToSort() throws IOException;
 
-    // TODO localhost -> host
-    public Client(int portNumber, int n) throws IOException {
-        this.n = n;
-        this.portNumber = portNumber;
-        socket = new Socket("localhost", portNumber);
-
-        in = new DataInputStream(socket.getInputStream());
-        out = new DataOutputStream(socket.getOutputStream());
+    public void run() throws InterruptedException, IOException {
+        for (int i = 0; i < nQueries; i++) {
+            askToSort();
+            TimeUnit.MILLISECONDS.sleep(delayInMs);
+        }
     }
 
-    public List<Integer> askToSort() throws IOException {
-        final int[] arrToSort = Sorter.generateArr(n);
-        Protocol.sendSortRequest(out, arrToSort);
-        final List<Integer> res = Protocol.getSortResponse(in);
-        return res;
-    }
-
-    public void stop() throws IOException {
-        out.close();
-        in.close();
-        socket.close();
-    }
-
-    public static void main(String[] args) throws IOException {
-    }
-
-    @Override
-    public void run() {
-
-    }
+    public abstract void stop() throws IOException;
 }
-

@@ -6,6 +6,8 @@ import ru.spbau.mit.Sorter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -14,6 +16,8 @@ import java.util.stream.IntStream;
 
 import static ru.mit.spbau.FlyingDataProtos.FlyingData;
 
+// TODO make everything static
+// TODO move into protocol
 public class RequestAnswerer {
 
     public FlyingData getAnswer(byte[] content) throws InvalidProtocolBufferException {
@@ -28,6 +32,33 @@ public class RequestAnswerer {
                 .newBuilder()
                 .addAllValue(list)
                 .build();
+    }
+
+    public void answerServerQuery(DatagramSocket socket) throws IOException {
+        final byte[] oldContent = new byte[socket.getReceiveBufferSize()];
+        final DatagramPacket recievedPacket = new DatagramPacket(oldContent , socket.getReceiveBufferSize());
+        socket.receive(recievedPacket);
+
+        final ByteBuffer buffer = ByteBuffer.wrap(recievedPacket.getData());
+        final int length = buffer.getInt();
+
+        final byte[] content = new byte[length];
+        buffer.get(content);
+
+        final FlyingData fd = getAnswer(content);
+
+        final byte[] bytes = new byte[fd.getSerializedSize() + 4];
+        final DatagramPacket packetToSend = new DatagramPacket(bytes, bytes.length);
+        final ByteBuffer wrapper = ByteBuffer.wrap(bytes);
+
+        wrapper.putInt(fd.getSerializedSize());
+        wrapper.put(fd.toByteArray());
+        packetToSend.setData(wrapper.array());
+
+        ///
+        packetToSend.setAddress(recievedPacket.getAddress());
+        packetToSend.setPort(recievedPacket.getPort());
+        socket.send(packetToSend);
     }
 
     public void answerServerQuery(Socket socket) throws IOException {

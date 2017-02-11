@@ -1,6 +1,5 @@
 package ru.spbau.mit;
 
-import java.util.Arrays;
 import java.util.Random;
 
 // TODO separate responsibilities for generating input and sorting
@@ -23,9 +22,9 @@ public class Sorter {
         return rand.ints(0, size * 2).limit(size).toArray();
     }
 
-    public static void main(String[] args) {
-        int[] a = generateArr(10);
-        insertionSort(a);
-        Arrays.stream(a).forEach(System.out::println);
-    }
+//    public static void main(String[] args) {
+//        int[] a = generateArr(10);
+//        insertionSort(a);
+//        Arrays.stream(a).forEach(System.out::println);
+//    }
 }
