@@ -58,7 +58,7 @@ public abstract class ServerTester {
 //        final UdpClient client = new UdpClient(getServerPort(), arrSize);
 //        final Client client = clientCreator.apply(getServerPort(), arrSize);
 //        final Client client = clientCreator.getClient(InetAddress.getByName("localhost"), getServerPort(), arrSize);
-        final Client client = getClient(InetAddress.getByName("localhost"), getServerPort(), arrSize
+        final Client client = getClient(InetAddress.getLocalHost(), getServerPort(), arrSize
                 , 0, 0);
         assertSorted(client.askToSort());
 //        Thread.sleep(5000);
@@ -71,7 +71,7 @@ public abstract class ServerTester {
         final int arrSize = 10_000;
 //        final TcpClient client = new TcpClient(getServerPort(), arrSize);
 //        final Client client = clientCreator.apply(getServerPort(), arrSize);
-        final Client client = getClient(InetAddress.getByName("localhost"), getServerPort(), arrSize
+        final Client client = getClient(InetAddress.getLocalHost(), getServerPort(), arrSize
                 , 0, 0);
 //        final Client client = clientCreator.getClient(InetAddress.getByName("localhost"), getServerPort(), arrSize);
         assertSorted(client.askToSort());

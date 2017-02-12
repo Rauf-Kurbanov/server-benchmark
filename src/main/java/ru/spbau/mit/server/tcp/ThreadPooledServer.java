@@ -1,6 +1,8 @@
 package ru.spbau.mit.server.tcp;
 
 import lombok.RequiredArgsConstructor;
+import ru.spbau.mit.server.RequestAnswerer;
+import ru.spbau.mit.server.ServerTimestamp;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -25,7 +27,9 @@ public class ThreadPooledServer extends Server {
                 final Socket clientSocket = serverSocket.accept();
                 executor.execute(() -> {
                     try {
-                        requestAnswerer.answerServerQuery(clientSocket);
+//                        requestAnswerer.answerServerQuery(clientSocket);
+                        final ServerTimestamp st = requestAnswerer.answerServerQuery(clientSocket);
+                        serverStatistics.pushStatistics(st);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }

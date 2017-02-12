@@ -1,5 +1,8 @@
 package ru.spbau.mit.server.tcp;
 
+import ru.spbau.mit.server.RequestAnswerer;
+import ru.spbau.mit.server.ServerTimestamp;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -15,7 +18,8 @@ public class SingleThreadServer extends Server {
         while (!serverSocket.isClosed()) {
             try {
                 final Socket clientSocket = serverSocket.accept();
-                requestAnswerer.answerServerQuery(clientSocket);
+                final ServerTimestamp st = requestAnswerer.answerServerQuery(clientSocket);
+                serverStatistics.pushStatistics(st);
             } catch (IOException e) {
                 System.out.println("Cannot open client socket");
             }

@@ -1,7 +1,7 @@
 package ru.spbau.mit.server.tcp.async.handlers;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import ru.spbau.mit.server.tcp.RequestAnswerer;
+import ru.spbau.mit.server.RequestAnswerer;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.CompletionHandler;
@@ -16,7 +16,9 @@ public class ReadHandler implements CompletionHandler<Integer, Attachement> {
         if (result == -1) {
             return;
         }
-
+        if (result > 0) {
+            attach.startClientHandling();
+        }
         if (attach.hasRemaining()) {
             if (attach.getClientChanel().isOpen()) {
                 attach.getClientChanel().read(attach.getBuffer(), attach, this);
@@ -35,9 +37,13 @@ public class ReadHandler implements CompletionHandler<Integer, Attachement> {
                 break;
             case READ_DATA:
                 try {
+                    attach.startRequestHandling();
                     final ByteBuffer[] data = requestAnswerer.answerInBuffers(attach.getDataBuffer().array());
-                    attach.getClientChanel().write(data, 0, 2, 0, TimeUnit.NANOSECONDS, data
-                            , new WriteHandler(attach.getClientChanel()));
+                    attach.finishRequestHandling();
+                    attach.setData(data);
+
+                    attach.getClientChanel().write(data, 0, 2, 0, TimeUnit.NANOSECONDS, attach
+                            , new WriteHandler());
                 } catch (InvalidProtocolBufferException e) {
                     System.err.println(e.getMessage());
                     e.printStackTrace();

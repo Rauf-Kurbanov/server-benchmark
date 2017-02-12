@@ -1,6 +1,6 @@
 package ru.spbau.mit.server.udp;
 
-import ru.spbau.mit.server.tcp.RequestAnswerer;
+import ru.spbau.mit.server.RequestAnswerer;
 import ru.spbau.mit.server.tcp.Server;
 
 import java.io.IOException;

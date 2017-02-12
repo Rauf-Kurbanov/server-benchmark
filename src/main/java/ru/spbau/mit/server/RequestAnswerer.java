@@ -1,4 +1,4 @@
-package ru.spbau.mit.server.tcp;
+package ru.spbau.mit.server;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import ru.spbau.mit.Sorter;
@@ -17,7 +17,7 @@ import java.util.stream.IntStream;
 import static ru.mit.spbau.FlyingDataProtos.FlyingData;
 
 // TODO make everything static
-// TODO move into protocol
+// TODO split responsibilities between RequestAnswerer and Protocol
 public class RequestAnswerer {
 
     public FlyingData getAnswer(byte[] content) throws InvalidProtocolBufferException {
@@ -33,8 +33,20 @@ public class RequestAnswerer {
                 .addAllValue(list)
                 .build();
     }
+//
+//    // TODO move into separate class
+//    @RequiredArgsConstructor
+//    public class ServerTimestamp {
+//        @Getter
+//        final long requestProcessingTime;
+//        @Getter
+//        final long clientProcessingTime;
+//    }
 
-    public void answerServerQuery(DatagramSocket socket) throws IOException {
+    // TODO use decorator
+    public ServerTimestamp answerServerQuery(DatagramSocket socket) throws IOException {
+        final long clientStartTime = System.nanoTime();
+
         final byte[] oldContent = new byte[socket.getReceiveBufferSize()];
         final DatagramPacket recievedPacket = new DatagramPacket(oldContent , socket.getReceiveBufferSize());
         socket.receive(recievedPacket);
@@ -45,7 +57,10 @@ public class RequestAnswerer {
         final byte[] content = new byte[length];
         buffer.get(content);
 
+        final long requestStartTime = System.nanoTime();
         final FlyingData fd = getAnswer(content);
+        final long requestProcessingTime = System.nanoTime() - requestStartTime ;
+
 
         final byte[] bytes = new byte[fd.getSerializedSize() + 4];
         final DatagramPacket packetToSend = new DatagramPacket(bytes, bytes.length);
@@ -59,19 +74,30 @@ public class RequestAnswerer {
         packetToSend.setAddress(recievedPacket.getAddress());
         packetToSend.setPort(recievedPacket.getPort());
         socket.send(packetToSend);
+
+        final long clientProcessingTime = System.nanoTime() - clientStartTime;
+        return new ServerTimestamp(requestProcessingTime, clientProcessingTime);
     }
 
-    public void answerServerQuery(Socket socket) throws IOException {
+    public ServerTimestamp answerServerQuery(Socket socket) throws IOException {
+        final long clientStartTime = System.nanoTime();
+
         final DataInputStream dis = new DataInputStream(socket.getInputStream());
         final DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
 
         final int serializedSize = dis.readInt();
         final byte[] content = new byte[serializedSize];
         dis.readFully(content);
+
+        final long requestStartTime = System.nanoTime();
         final FlyingData newFd = getAnswer(content);
+        final long requestProcessingTime = System.nanoTime() - requestStartTime ;
 
         dos.writeInt(newFd.getSerializedSize());
         dos.write(newFd.toByteArray());
+
+        final long clientProcessingTime = System.nanoTime() - clientStartTime;
+        return new ServerTimestamp(requestProcessingTime, clientProcessingTime);
     }
 
     public ByteBuffer[] answerInBuffers(byte[] content) throws InvalidProtocolBufferException {
@@ -79,6 +105,8 @@ public class RequestAnswerer {
 
         final ByteBuffer sizeBuffer = ByteBuffer.allocate(4).putInt(newFd.getSerializedSize());
         sizeBuffer.flip();
+//        attach.setSizeBuffer(sizeBuffer);
+//        attach.setDataBuffer(ByteBuffer.wrap(newFd.toByteArray()));
         return new ByteBuffer[]{sizeBuffer, ByteBuffer.wrap(newFd.toByteArray())};
     }
 }

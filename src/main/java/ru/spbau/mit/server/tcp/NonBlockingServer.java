@@ -2,6 +2,8 @@ package ru.spbau.mit.server.tcp;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
+import ru.spbau.mit.server.RequestAnswerer;
+import ru.spbau.mit.server.ServerTimestamp;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -67,13 +69,20 @@ public class NonBlockingServer extends Server {
         final SocketChannel channel = (SocketChannel) key.channel();
         checkContext(key);
 
-        final ChannelContext context = (ChannelContext) key.attachment();
+        final ChannelAttachment context = (ChannelAttachment) key.attachment();
         switch (context.state) {
             case READ_SIZE:
+                // TODO why do you close chanel here but assume it closes itself in async server
                 final int readCount = channel.read(context.sizeBuffer);
                 if (readCount == -1) {
                     key.cancel();
                     channel.close();
+                }
+
+//                if (readCount > 0 && context.clientHandlingStart == -1) {
+                if (readCount > 0) {
+                    context.startClientHandling();
+//                    context.clientHandlingStart = System.nanoTime(); ////////////////////////////////
                 }
 
                 if (context.sizeBuffer.hasRemaining()) {
@@ -92,10 +101,14 @@ public class NonBlockingServer extends Server {
                 }
                 context.state = ChannelState.PROCEED;
                 myThreadPool.execute(() -> {
+                    context.startRequestHandling();
+//                    context.requestHandlingStart = System.nanoTime(); ////////////////////////////////
                     final byte[] data = (byte[]) context.dataBuffer.flip().array();
                     try {
                         // TODO
                         context.answer = requestAnswerer.answerInBuffers(data);
+//                        context.requestHandlingDuration = System.nanoTime() - context.requestHandlingStart;
+                        context.finishRequestHandling();
                         context.state = ChannelState.WRITE;
                     } catch (InvalidProtocolBufferException e) {
                         e.printStackTrace();
@@ -107,15 +120,15 @@ public class NonBlockingServer extends Server {
     }
 
     private void checkContext(SelectionKey key) {
-        final ChannelContext context = (ChannelContext) key.attachment();
+        final ChannelAttachment context = (ChannelAttachment) key.attachment();
         if (context == null || context.state == ChannelState.DONE) {
-            final ChannelContext newContext = new ChannelContext();
+            final ChannelAttachment newContext = new ChannelAttachment();
             key.attach(newContext);
         }
     }
 
     private void write(SelectionKey key) throws IOException {
-        final ChannelContext context = (ChannelContext) key.attachment();
+        final ChannelAttachment context = (ChannelAttachment) key.attachment();
         if (context.state == ChannelState.WRITE) {
             final SocketChannel channel = (SocketChannel) key.channel();
             if (context.answer[1].hasRemaining()) {
@@ -123,6 +136,10 @@ public class NonBlockingServer extends Server {
             }
 
             if (!context.answer[1].hasRemaining()) {
+                final ServerTimestamp st = context.finishClientHandling();
+                serverStatistics.pushStatistics(st);
+//                context.clientHandlingDuration = System.nanoTime() - context.clientHandlingStart;
+                // push statistics
                 context.state = ChannelState.DONE;
             }
         }
@@ -132,7 +149,7 @@ public class NonBlockingServer extends Server {
         final SocketChannel channel = ((ServerSocketChannel) key.channel()).accept();
         channel.configureBlocking(false);
         channel.socket().setTcpNoDelay(true);
-        final ChannelContext context = new ChannelContext();
+        final ChannelAttachment context = new ChannelAttachment();
         channel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE,
                 context);
         activeChannels.add(channel);
@@ -151,14 +168,21 @@ public class NonBlockingServer extends Server {
         }
     }
 
-    private static class ChannelContext {
-        final ByteBuffer sizeBuffer = ByteBuffer.allocate(4);
-        ByteBuffer dataBuffer;
-        volatile ByteBuffer[] answer;
-        volatile ChannelState state = ChannelState.READ_SIZE;
-    }
+//    private static class ChannelAttachment {
+//        private ServerTimestamp serverTimestamp;
+//
+//        final ByteBuffer sizeBuffer = ByteBuffer.allocate(4);
+//        ByteBuffer dataBuffer;
+//        // TODO hwy
+//        volatile ByteBuffer[] answer;
+//        volatile ChannelState state = ChannelState.READ_SIZE;
+//
+////        public void startClientHandling() {
+////            serverTimestamp.
+////        }
+//    }
 
-    private enum ChannelState {
+    public enum ChannelState {
         READ_SIZE, READ_DATA, PROCEED, WRITE, DONE
     }
 }

@@ -14,23 +14,12 @@ public class AsynchronousServer extends Server {
     private final ExecutorService serverThreadExecutor = Executors.newSingleThreadExecutor();
     private volatile AsynchronousServerSocketChannel serverChannel;
 
-//    @Override
-//    public void start(int portNumber) {
-//        serverThreadExecutor.execute(() -> {
-//            try {
-//                runServer(portNumber);
-//                // TODO
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        });
-//    }
-
     @Override
     protected void runServer(int portNumber) throws IOException {
         serverChannel = AsynchronousServerSocketChannel.open();
         serverChannel.bind(new InetSocketAddress(portNumber), Integer.MAX_VALUE);
-        serverChannel.accept(serverChannel, new AcceptHandler());
+//        serverChannel.accept(serverChannel, new AcceptHandler());
+        serverChannel.accept(serverChannel, new AcceptHandler(serverStatistics));
     }
 
     @Override
