@@ -1,7 +1,7 @@
 package ru.spbau.mit.server.udp;
 
 import ru.spbau.mit.server.RequestAnswerer;
-import ru.spbau.mit.server.tcp.Server;
+import ru.spbau.mit.server.Server;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -25,19 +25,15 @@ public class ThreadPooledServer extends Server {
         while (!socket.isClosed()) {
             executor.execute(() -> {
                 try {
-                    requestAnswerer.answerServerQuery(socket);
-                } catch (IOException e) {
-                    // TODO consider ignoring or logging
-                    System.err.println("Can't answer client request now");
-                    System.err.println(e.getMessage());
-                }
+                    serverStatistics.pushStatistics(requestAnswerer.answerServerQuery(socket));
+                } catch (IOException ignored) {}
             });
         }
     }
 
     @Override
-    public void stop() throws IOException {
-        super.stop();
+    public void shutdown() throws IOException {
+        super.shutdown();
         socket.close();
     }
 }

@@ -2,8 +2,8 @@ package ru.spbau.mit.server.udp;
 
 import ru.spbau.mit.client.Client;
 import ru.spbau.mit.client.UdpClient;
-import ru.spbau.mit.server.tcp.Server;
-import ru.spbau.mit.server.tcp.ServerTester;
+import ru.spbau.mit.server.Server;
+import ru.spbau.mit.server.ServerTester;
 
 import java.io.IOException;
 import java.net.InetAddress;

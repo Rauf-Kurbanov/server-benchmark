@@ -14,12 +14,6 @@ public interface UdpProtocol {
 
     // TODO reuse TcpProtocol code
     static void sendSortRequest(DatagramSocket socket, int[] arrToSort, DatagramPacket datagramPacket) throws IOException {
-        // TODO eliminate magic constant
-        // TODO maybe move into member
-//        final byte[] buffer = new byte[1 << 16];
-//        final DatagramPacket datagramPacket = new DatagramPacket(buffer, buffer.length,
-//                socket.getInetAddress(), socket.getPort());
-
         final List<Integer> iterable = IntStream.of(arrToSort).boxed().collect(Collectors.toList());
         final FlyingDataProtos.FlyingData fd = FlyingDataProtos.FlyingData
                 .newBuilder().addAllValue(iterable).build();
@@ -29,14 +23,10 @@ public interface UdpProtocol {
         byteBuffer.put(fd.toByteArray());
         datagramPacket.setData(byteBuffer.array(), 0, byteBuffer.position());
 
-//        DataUtils.write(myData, datagramPacket, buffer);
         socket.send(datagramPacket);
     }
 
     static List<Integer> getSortResponse(DatagramSocket socket, DatagramPacket datagramPacket) throws IOException {
-//        final byte[] byteArray = new byte[1 << 16];
-//        final DatagramPacket datagramPacket = new DatagramPacket(byteArray, byteArray.length,
-//                socket.getInetAddress(), socket.getPort());
         socket.receive(datagramPacket);
         final ByteBuffer buffer = ByteBuffer.wrap(datagramPacket.getData());
         final int length = buffer.getInt();

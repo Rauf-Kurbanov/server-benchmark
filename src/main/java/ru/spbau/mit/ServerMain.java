@@ -1,9 +1,12 @@
 package ru.spbau.mit;
 
-import ru.spbau.mit.server.tcp.SingleThreadServer;
+import ru.spbau.mit.runner.ServerRunner;
 
 public class ServerMain {
+
+    private static ServerRunner serverRunner = new ServerRunner();
+
     public static void main(String[] args) {
-        new SingleThreadServer().start(6968);
+        serverRunner.start();
     }
 }

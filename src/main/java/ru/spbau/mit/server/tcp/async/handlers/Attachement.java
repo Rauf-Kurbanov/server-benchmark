@@ -17,7 +17,6 @@ public class Attachement extends TimeStampingAttachment {
     @Getter
     private final AsynchronousSocketChannel clientChanel;
     @Getter
-//    @Setter
     private final ByteBuffer sizeBuffer = ByteBuffer.allocate(4);
     @Getter
     private final ServerStatistics serverStatistics;
@@ -51,8 +50,4 @@ public class Attachement extends TimeStampingAttachment {
         }
         return dataBuffer;
     }
-
-//    public ByteBuffer[] getData() {
-//        return new ByteBuffer[]{sizeBuffer, dataBuffer};
-//    }
 }

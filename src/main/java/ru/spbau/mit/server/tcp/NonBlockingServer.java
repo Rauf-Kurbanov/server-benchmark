@@ -3,6 +3,7 @@ package ru.spbau.mit.server.tcp;
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import ru.spbau.mit.server.RequestAnswerer;
+import ru.spbau.mit.server.Server;
 import ru.spbau.mit.server.ServerTimestamp;
 
 import java.io.IOException;
@@ -21,7 +22,6 @@ import java.util.concurrent.Executors;
 @Slf4j
 public class NonBlockingServer extends Server {
 
-//    private final ExecutorService serverThreadExecutor = Executors.newSingleThreadExecutor();
     private static final int THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors() + 1;
     private final ExecutorService myThreadPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
     private Selector selector;
@@ -46,19 +46,13 @@ public class NonBlockingServer extends Server {
                 final SelectionKey key = keyIterator.next();
                 keyIterator.remove();
 
-                if (!key.isValid()) {
-                    continue;
-                }
-                if (key.isAcceptable()) {
-                    log.info("accepting " + key);
+                if (key.isValid() && key.isAcceptable()) {
                     accept(key);
                 }
-                if (key.isReadable()) {
-                    log.info("reading " + key);
+                if (key.isValid() && key.isReadable()) {
                     read(key);
                 }
-                if (key.isWritable()) {
-                    log.info("writing " + key);
+                if (key.isValid() && key.isWritable()) {
                     write(key);
                 }
             }
@@ -70,46 +64,37 @@ public class NonBlockingServer extends Server {
         checkContext(key);
 
         final ChannelAttachment context = (ChannelAttachment) key.attachment();
-        switch (context.state) {
+        switch (context.getState()) {
             case READ_SIZE:
                 // TODO why do you close chanel here but assume it closes itself in async server
-                final int readCount = channel.read(context.sizeBuffer);
+                final int readCount = channel.read(context.getSizeBuffer());
                 if (readCount == -1) {
                     key.cancel();
                     channel.close();
                 }
-
-//                if (readCount > 0 && context.clientHandlingStart == -1) {
                 if (readCount > 0) {
                     context.startClientHandling();
-//                    context.clientHandlingStart = System.nanoTime(); ////////////////////////////////
                 }
-
-                if (context.sizeBuffer.hasRemaining()) {
+                if (context.getSizeBuffer().hasRemaining()) {
                     break;
                 }
-
-                context.sizeBuffer.flip();
-                final int size = context.sizeBuffer.getInt();
-                System.out.println("size = " + size);
-                context.dataBuffer = ByteBuffer.allocate(size);
-                context.state = ChannelState.READ_DATA;
+                context.getSizeBuffer().flip();
+                final int size = context.getSizeBuffer().getInt();
+                context.setDataBuffer(ByteBuffer.allocate(size));
+                context.setState(ChannelState.READ_DATA);
             case READ_DATA:
-                channel.read(context.dataBuffer);
-                if (context.dataBuffer.hasRemaining()) {
+                channel.read(context.getDataBuffer());
+                if (context.getDataBuffer().hasRemaining()) {
                     break;
                 }
-                context.state = ChannelState.PROCEED;
+                context.setState(ChannelState.PROCEED);
                 myThreadPool.execute(() -> {
                     context.startRequestHandling();
-//                    context.requestHandlingStart = System.nanoTime(); ////////////////////////////////
-                    final byte[] data = (byte[]) context.dataBuffer.flip().array();
+                    final byte[] data = (byte[]) context.getDataBuffer().flip().array();
                     try {
-                        // TODO
-                        context.answer = requestAnswerer.answerInBuffers(data);
-//                        context.requestHandlingDuration = System.nanoTime() - context.requestHandlingStart;
+                        context.setAnswer(requestAnswerer.answerInBuffers(data));
                         context.finishRequestHandling();
-                        context.state = ChannelState.WRITE;
+                        context.setState(ChannelState.WRITE);
                     } catch (InvalidProtocolBufferException e) {
                         e.printStackTrace();
                     }
@@ -121,7 +106,7 @@ public class NonBlockingServer extends Server {
 
     private void checkContext(SelectionKey key) {
         final ChannelAttachment context = (ChannelAttachment) key.attachment();
-        if (context == null || context.state == ChannelState.DONE) {
+        if (context == null || context.getState() == ChannelState.DONE) {
             final ChannelAttachment newContext = new ChannelAttachment();
             key.attach(newContext);
         }
@@ -129,18 +114,16 @@ public class NonBlockingServer extends Server {
 
     private void write(SelectionKey key) throws IOException {
         final ChannelAttachment context = (ChannelAttachment) key.attachment();
-        if (context.state == ChannelState.WRITE) {
+        if (context.getState() == ChannelState.WRITE) {
             final SocketChannel channel = (SocketChannel) key.channel();
-            if (context.answer[1].hasRemaining()) {
-                channel.write(context.answer);
+            if (context.getAnswer()[1].hasRemaining()) {
+                channel.write(context.getAnswer());
             }
 
-            if (!context.answer[1].hasRemaining()) {
+            if (!context.getAnswer()[1].hasRemaining()) {
                 final ServerTimestamp st = context.finishClientHandling();
                 serverStatistics.pushStatistics(st);
-//                context.clientHandlingDuration = System.nanoTime() - context.clientHandlingStart;
-                // push statistics
-                context.state = ChannelState.DONE;
+                context.setState(ChannelState.DONE);
             }
         }
     }
@@ -156,31 +139,16 @@ public class NonBlockingServer extends Server {
     }
 
     @Override
-    public void stop() throws IOException {
-        super.stop();
+    public void shutdown() throws IOException {
+        super.shutdown();
         if (serverSocketChannel != null) {
             serverSocketChannel.close();
             serverSocketChannel.socket().close();
         }
-
         for (SocketChannel channel : activeChannels) {
             channel.close();
         }
     }
-
-//    private static class ChannelAttachment {
-//        private ServerTimestamp serverTimestamp;
-//
-//        final ByteBuffer sizeBuffer = ByteBuffer.allocate(4);
-//        ByteBuffer dataBuffer;
-//        // TODO hwy
-//        volatile ByteBuffer[] answer;
-//        volatile ChannelState state = ChannelState.READ_SIZE;
-//
-////        public void startClientHandling() {
-////            serverTimestamp.
-////        }
-//    }
 
     public enum ChannelState {
         READ_SIZE, READ_DATA, PROCEED, WRITE, DONE

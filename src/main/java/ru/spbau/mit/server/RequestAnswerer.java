@@ -33,15 +33,6 @@ public class RequestAnswerer {
                 .addAllValue(list)
                 .build();
     }
-//
-//    // TODO move into separate class
-//    @RequiredArgsConstructor
-//    public class ServerTimestamp {
-//        @Getter
-//        final long requestProcessingTime;
-//        @Getter
-//        final long clientProcessingTime;
-//    }
 
     // TODO use decorator
     public ServerTimestamp answerServerQuery(DatagramSocket socket) throws IOException {
@@ -55,7 +46,7 @@ public class RequestAnswerer {
         final int length = buffer.getInt();
 
         final byte[] content = new byte[length];
-        buffer.get(content);
+         buffer.get(content);
 
         final long requestStartTime = System.nanoTime();
         final FlyingData fd = getAnswer(content);
@@ -70,13 +61,12 @@ public class RequestAnswerer {
         wrapper.put(fd.toByteArray());
         packetToSend.setData(wrapper.array());
 
-        ///
         packetToSend.setAddress(recievedPacket.getAddress());
         packetToSend.setPort(recievedPacket.getPort());
         socket.send(packetToSend);
 
         final long clientProcessingTime = System.nanoTime() - clientStartTime;
-        return new ServerTimestamp(requestProcessingTime, clientProcessingTime);
+        return ServerTimestamp.fromNano(requestProcessingTime, clientProcessingTime);
     }
 
     public ServerTimestamp answerServerQuery(Socket socket) throws IOException {
@@ -97,7 +87,8 @@ public class RequestAnswerer {
         dos.write(newFd.toByteArray());
 
         final long clientProcessingTime = System.nanoTime() - clientStartTime;
-        return new ServerTimestamp(requestProcessingTime, clientProcessingTime);
+//        return new ServerTimestamp(requestProcessingTime, clientProcessingTime);
+        return ServerTimestamp.fromNano(requestProcessingTime, clientProcessingTime);
     }
 
     public ByteBuffer[] answerInBuffers(byte[] content) throws InvalidProtocolBufferException {
@@ -105,8 +96,6 @@ public class RequestAnswerer {
 
         final ByteBuffer sizeBuffer = ByteBuffer.allocate(4).putInt(newFd.getSerializedSize());
         sizeBuffer.flip();
-//        attach.setSizeBuffer(sizeBuffer);
-//        attach.setDataBuffer(ByteBuffer.wrap(newFd.toByteArray()));
         return new ByteBuffer[]{sizeBuffer, ByteBuffer.wrap(newFd.toByteArray())};
     }
 }

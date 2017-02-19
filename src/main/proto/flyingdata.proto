@@ -2,11 +2,18 @@ option java_package = "ru.mit.spbau";
 option java_outer_classname = "FlyingDataProtos";
 
 message FlyingData {
-//  optional int32 size = 1;
-
-//  message FlyingArray {
   repeated int32 value = 1 [packed=true];
-//  }
+}
 
-//  optional FlyingArray array = 2;
+message ServerType {
+    required string serverType = 1;
+}
+
+message Confirmation {
+    required int32 nothing = 1;
+}
+
+message BenchmarkResult {
+    required uint64 queryProcessingTime = 1;
+    required uint64 clientProcessingTime = 2;
 }

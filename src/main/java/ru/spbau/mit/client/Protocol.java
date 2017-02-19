@@ -12,8 +12,6 @@ import java.util.stream.IntStream;
 // TODO split tcp and udp protocols
 public interface Protocol {
 
-    int MAX_MESSAGE_SIZE = 10 * 1024;
-
     static void sendSortRequest(DataOutputStream out, int[] arrToSort) throws IOException {
         final List<Integer> iterable = IntStream.of(arrToSort).boxed().collect(Collectors.toList());
         final FlyingDataProtos.FlyingData fd = FlyingDataProtos.FlyingData
@@ -25,7 +23,6 @@ public interface Protocol {
 
     static List<Integer> getSortResponse(DataInputStream in) throws IOException {
         final int serializedSize = in.readInt();
-        System.out.println("serializedSize = " + serializedSize);
         final byte[] content = new byte[serializedSize];
         in.readFully(content);
         final FlyingDataProtos.FlyingData newFd = FlyingDataProtos.FlyingData.parseFrom(content);

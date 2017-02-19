@@ -1,8 +1,8 @@
 package ru.spbau.mit.client;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public abstract class Client {
 
@@ -11,11 +11,12 @@ public abstract class Client {
 
     public abstract List<Integer> askToSort() throws IOException;
 
-    public void run() throws InterruptedException, IOException {
+    public List<List<Integer>> run() throws InterruptedException, IOException {
+        final List<List<Integer>> res = new ArrayList<>();
         for (int i = 0; i < nQueries; i++) {
-            askToSort();
-            TimeUnit.MILLISECONDS.sleep(delayInMs);
+            res.add(askToSort());
         }
+        return res;
     }
 
     public abstract void stop() throws IOException;

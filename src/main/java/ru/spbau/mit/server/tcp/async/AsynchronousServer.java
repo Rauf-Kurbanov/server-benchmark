@@ -1,6 +1,6 @@
 package ru.spbau.mit.server.tcp.async;
 
-import ru.spbau.mit.server.tcp.Server;
+import ru.spbau.mit.server.Server;
 import ru.spbau.mit.server.tcp.async.handlers.AcceptHandler;
 
 import java.io.IOException;
@@ -18,12 +18,11 @@ public class AsynchronousServer extends Server {
     protected void runServer(int portNumber) throws IOException {
         serverChannel = AsynchronousServerSocketChannel.open();
         serverChannel.bind(new InetSocketAddress(portNumber), Integer.MAX_VALUE);
-//        serverChannel.accept(serverChannel, new AcceptHandler());
         serverChannel.accept(serverChannel, new AcceptHandler(serverStatistics));
     }
 
     @Override
-    public void stop() throws IOException {
+    public void shutdown() throws IOException {
         serverThreadExecutor.shutdown();
         if (serverChannel != null) {
             serverChannel.close();

@@ -1,12 +1,12 @@
 package ru.spbau.mit.server.udp;
 
 import ru.spbau.mit.server.RequestAnswerer;
-import ru.spbau.mit.server.tcp.Server;
+import ru.spbau.mit.server.Server;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
 
-public class SingleThreadServer extends Server {
+public class UdpSingleThreadServer extends Server {
 
     private static final int RECEIVE_BUFFER_SIZE = 1024 * 1024 * 100;
     private static final int SEND_BUFFER_SIZE = 1024 * 1024 * 100;
@@ -21,13 +21,13 @@ public class SingleThreadServer extends Server {
         socket.setSendBufferSize(SEND_BUFFER_SIZE);
 
         while (!socket.isClosed()) {
-            requestAnswerer.answerServerQuery(socket);
+            serverStatistics.pushStatistics(requestAnswerer.answerServerQuery(socket));
         }
     }
 
     @Override
-    public void stop() throws IOException {
-        super.stop();
+    public void shutdown() throws IOException {
+        super.shutdown();
         socket.close();
     }
 }

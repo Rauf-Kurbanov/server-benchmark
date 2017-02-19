@@ -21,6 +21,5 @@ public class AcceptHandler implements CompletionHandler<AsynchronousSocketChanne
 
     @Override
     public void failed(Throwable exc, AsynchronousServerSocketChannel attachment) {
-
     }
 }

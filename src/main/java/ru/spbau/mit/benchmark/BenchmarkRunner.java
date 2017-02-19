@@ -2,54 +2,39 @@ package ru.spbau.mit.benchmark;
 
 import lombok.RequiredArgsConstructor;
 import ru.spbau.mit.client.Client;
+import ru.spbau.mit.runner.RunnerProtocol;
 
-import javax.enterprise.inject.spi.Producer;
+import java.io.IOException;
+import java.net.InetAddress;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicLong;
 
 @RequiredArgsConstructor
 public class BenchmarkRunner {
-    private final int nClients;
-    private final Producer<Client> clientProducer;
+    private final ClientServerFactory clientServerFactory;
+    private final InetAddress serverAddress;
 
-//    private final BenchmarkParameters myParameters;
-//    private final InetAddress myServerAddress;
-//    private final int port;
-
-//    InetAddress getAddress() {
-//        return myServerAddress;
-//    }
-
-//    ServerArchitectureDescription getArchitectureDescription() {
-//        return myDescription;
-//    }
-
-    public long start() throws BrokenBarrierException, InterruptedException {
-//        final int clientsCount = myParameters.getNClients();
+    public long start(BenchmarkParameters bp) throws BrokenBarrierException, InterruptedException, IOException {
+        final int nClients = bp.getNClients();
         final CyclicBarrier barrier = new CyclicBarrier(nClients + 1);
         final Thread[] clients = new Thread[nClients];
 
         final AtomicLong averageTimePerClient = new AtomicLong(0);
         for (int i = 0; i < nClients; i++) {
-//            final Client client = BenchmarkClient.create(myParameters, myDescription, myServerAddress);
-//            final Client client = BenchmarkParameters.getClient(myServerAddress, port, myParameters);
-            final Client client = clientProducer.produce(null);
+            final Client client = clientServerFactory.getClient(serverAddress, RunnerProtocol.TESTED_SERVER_PORT, bp);
             final Thread clientThread = new Thread(() -> {
                 try {
                     barrier.await();
                     final long clientStartTime = System.nanoTime();
                     client.run();
                     long duration = System.nanoTime() - clientStartTime;
-                    // TODO hz
-//                    final long sleepMs = myParameters.getDelayInMs() * (myParameters.getNQueries() - 1);
-//                    duration -= TimeUnit.MILLISECONDS.toNanos(sleepMs);
+                    client.stop();
                     averageTimePerClient.addAndGet(duration / nClients);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             });
-
             clientThread.start();
             clients[i] = clientThread;
         }
@@ -58,7 +43,6 @@ public class BenchmarkRunner {
         for (Thread thread : clients) {
             thread.join();
         }
-
-        return averageTimePerClient.get();
+        return averageTimePerClient.get() / 1_000_000;
     }
 }

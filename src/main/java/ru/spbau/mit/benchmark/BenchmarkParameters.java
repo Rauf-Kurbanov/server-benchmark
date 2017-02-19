@@ -1,18 +1,14 @@
 package ru.spbau.mit.benchmark;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-@RequiredArgsConstructor
+@Data
+@AllArgsConstructor
 public class BenchmarkParameters {
-    @Getter
-    private final int arraySize;
-    @Getter
-    private final int nClients;
-    @Getter
-    private final int nQueries;
-    @Getter
-    private final int delayInMs;
-
+    private int arraySize;
+    private int nClients;
+    private int nQueries;
+    private int delayInMs;
 }
 

@@ -1,6 +1,7 @@
 package ru.spbau.mit.server.tcp;
 
 import ru.spbau.mit.server.RequestAnswerer;
+import ru.spbau.mit.server.Server;
 import ru.spbau.mit.server.ServerTimestamp;
 
 import java.io.IOException;
@@ -9,7 +10,6 @@ import java.net.Socket;
 
 public class MultiThreadServer extends Server {
 
-//    private final ExecutorService serverThreadExecutor = Executors.newSingleThreadExecutor();
     private ServerSocket serverSocket;
     private final RequestAnswerer requestAnswerer = new RequestAnswerer();
 
@@ -21,9 +21,10 @@ public class MultiThreadServer extends Server {
                 final Socket clientSocket = serverSocket.accept();
                 new Thread(() -> {
                     try {
-//                        requestAnswerer.answerServerQuery(clientSocket);
-                        final ServerTimestamp st = requestAnswerer.answerServerQuery(clientSocket);
-                        serverStatistics.pushStatistics(st);
+                        while (!clientSocket.isClosed()) {
+                            final ServerTimestamp st = requestAnswerer.answerServerQuery(clientSocket);
+                            serverStatistics.pushStatistics(st);
+                        }
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -36,13 +37,12 @@ public class MultiThreadServer extends Server {
 
 
     @Override
-    public void stop() throws IOException {
-        super.stop();
+    public void shutdown() throws IOException {
+        super.shutdown();
         try {
             serverSocket.close();
         } catch (IOException e) {
             throw new RuntimeException("Error closing server", e);
         }
-//        serverThreadExecutor.shutdownNow();
     }
 }
