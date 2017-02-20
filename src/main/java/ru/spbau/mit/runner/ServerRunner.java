@@ -80,4 +80,8 @@ public class ServerRunner {
         }
         serverThreadExecutor.shutdownNow();
     }
+
+    public static void main(String[] args) {
+        new ServerRunner().start();
+    }
 }

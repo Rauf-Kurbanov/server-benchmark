@@ -65,8 +65,8 @@ public class Experiment {
             timesPerConnection.add(bres.getClientProcessingTime());
 
             final ServerArchitecture sa = runnerClient.getServerArchitecture();
-            log.info("{} {} {} {} {} {}", sa, varyingParameter, param, averageTimePerClient
-                    , bres.getQueryProcessingTime(), bres.getClientProcessingTime());
+            log.info("{} {} {} {} {} {}", new Object[]{sa, varyingParameter, param, averageTimePerClient
+                    , bres.getQueryProcessingTime(), bres.getClientProcessingTime()});
         }
     }
 
