@@ -44,23 +44,23 @@ dependencies {
     compile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
 
 // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
-//    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.21'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.21'
 // https://mvnrepository.com/artifact/org.slf4j/slf4j-log4j12
-//    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.21'
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.21'
 
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-simple
-    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.6.1'
+//    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.6.1'
 }
 
 task local(type: OneJar) {
-    mainClass = 'Main'
+    mainClass = 'ru.spbau.mit.runner.ServerRunner'
     archiveName = 'launcher.jar'
 }
 
-//task localController(type: OneJar) {
-//    mainClass = 'ru.spbau.mit.GUI.Controller'
-//    archiveName = 'client.jar'
-//}
+task localController(type: OneJar) {
+    mainClass = 'ru.spbau.mit.ui.Controller'
+    archiveName = 'client.jar'
+}
 
 protobuf {
     protoc {
