@@ -8,10 +8,10 @@ import lombok.RequiredArgsConstructor;
 // TODO consider using builder
 public class ServerTimestamp {
 
-    public static ServerTimestamp fromNano(long nanoRequestTime, long nanoClientTime) {
-        return new ServerTimestamp(nanoRequestTime / 1_000_000
-                , nanoClientTime / 1_000_000);
-    }
+//    public static ServerTimestamp fromNano(long nanoRequestTime, long nanoClientTime) {
+//        return new ServerTimestamp(nanoRequestTime / 1_000_000
+//                , nanoClientTime / 1_000_000);
+//    }
 
     @Getter
     private final long requestProcessingTime;

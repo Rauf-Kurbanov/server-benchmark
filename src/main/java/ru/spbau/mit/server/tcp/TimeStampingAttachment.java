@@ -26,6 +26,6 @@ public class TimeStampingAttachment {
 
     public ServerTimestamp finishClientHandling() {
         clientHandlingDuration = System.nanoTime() - clientHandlingStart;
-        return ServerTimestamp.fromNano(requestHandlingDuration, clientHandlingDuration);
+        return new ServerTimestamp(requestHandlingDuration, clientHandlingDuration);
     }
 }

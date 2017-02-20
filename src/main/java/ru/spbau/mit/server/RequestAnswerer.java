@@ -66,7 +66,8 @@ public class RequestAnswerer {
         socket.send(packetToSend);
 
         final long clientProcessingTime = System.nanoTime() - clientStartTime;
-        return ServerTimestamp.fromNano(requestProcessingTime, clientProcessingTime);
+//        return ServerTimestamp.fromNano(requestProcessingTime, clientProcessingTime);
+        return new ServerTimestamp(requestProcessingTime, clientProcessingTime);
     }
 
     public ServerTimestamp answerServerQuery(Socket socket) throws IOException {
@@ -88,7 +89,7 @@ public class RequestAnswerer {
 
         final long clientProcessingTime = System.nanoTime() - clientStartTime;
 //        return new ServerTimestamp(requestProcessingTime, clientProcessingTime);
-        return ServerTimestamp.fromNano(requestProcessingTime, clientProcessingTime);
+        return new ServerTimestamp(requestProcessingTime, clientProcessingTime);
     }
 
     public ByteBuffer[] answerInBuffers(byte[] content) throws InvalidProtocolBufferException {

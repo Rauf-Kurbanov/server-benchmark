@@ -4,6 +4,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import ru.mit.spbau.FlyingDataProtos;
 import ru.spbau.mit.benchmark.BenchmarkParameters;
 import ru.spbau.mit.benchmark.BenchmarkRunner;
@@ -16,6 +17,7 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+@Slf4j
 @RequiredArgsConstructor
 public class Experiment {
     private final BenchmarkRunner benchmarkRunner;
@@ -28,6 +30,10 @@ public class Experiment {
     private final List<Long> timesPerQuery = new ArrayList<>();
     private final List<Long> timesPerConnection = new ArrayList<>();
 
+    static {
+        log.info("SERVER_ARCH PARAM PARAM_VAL CLIENT_TIME QUERY_PROC_TIME CONNECT_PROC_TIME");
+    }
+
     public Experiment(BenchmarkRunner br, BenchmarkParameters bp, RunnerClient rc,
                       VaryingParameter vp, int varyingFrom, int varyingTo, int varyingStep) {
         this.benchmarkRunner = br;
@@ -37,7 +43,6 @@ public class Experiment {
         this.varyingRange = IntStream
                 .rangeClosed(varyingFrom, varyingTo).filter(x -> x % varyingStep == 0)
                 .boxed().collect(Collectors.toList());
-        System.out.println("Experiment constructed");
     }
 
     public void run() throws BrokenBarrierException, InterruptedException, IOException {
@@ -56,10 +61,12 @@ public class Experiment {
             final long averageTimePerClient = benchmarkRunner.start(initalBP);
             timesPerClient.add(averageTimePerClient);
             final FlyingDataProtos.BenchmarkResult bres = runnerClient.askStatistics();
-            System.out.println("BRES");
-            System.out.println(bres);
             timesPerQuery.add(bres.getQueryProcessingTime());
             timesPerConnection.add(bres.getClientProcessingTime());
+
+            final ServerArchitecture sa = runnerClient.getServerArchitecture();
+            log.info("{} {} {} {} {} {}", sa, varyingParameter, param, averageTimePerClient
+                    , bres.getQueryProcessingTime(), bres.getClientProcessingTime());
         }
     }
 
@@ -68,21 +75,10 @@ public class Experiment {
     }
 
     public LineChart<? extends Number, ? extends Number> getParamQueryChart() {
-        // TODO
-        for  (long l : timesPerQuery) {
-            System.out.print(l + ", ");
-        }
-        System.out.println();
-
         return makeChart(varyingRange, timesPerQuery, "Query processing time");
     }
 
     public LineChart<? extends Number, ? extends Number> getParamConnectionChart() {
-        for  (long l : timesPerConnection) {
-            System.out.print(l + ", ");
-        }
-        System.out.println();
-
         return makeChart(varyingRange, timesPerConnection, "Client processing time");
     }
 
@@ -93,7 +89,7 @@ public class Experiment {
 
         final String xLabel = varyingParameter.toString();
         xAxis.setLabel(xLabel);
-        yAxis.setLabel("Time in ms");
+        yAxis.setLabel("Time in ns");
         final LineChart<Number, Number> lineChart =
                 new LineChart<>(xAxis, yAxis);
         lineChart.setTitle(title);

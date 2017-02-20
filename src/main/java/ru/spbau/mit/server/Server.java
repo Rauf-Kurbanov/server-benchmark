@@ -12,14 +12,10 @@ public abstract class Server {
     protected final ServerStatistics serverStatistics = new ServerStatistics();
 
     public FlyingDataProtos.BenchmarkResult getBenchmarkResult() {
-        System.out.println(">> " + serverStatistics.getQueryProcessingMetric());
-        System.out.println(">> " + serverStatistics.getClientProcessingMetric());
         final FlyingDataProtos.BenchmarkResult res =  FlyingDataProtos.BenchmarkResult.newBuilder()
                 .setQueryProcessingTime(serverStatistics.getQueryProcessingMetric())
                 .setClientProcessingTime(serverStatistics.getClientProcessingMetric())
                 .build();
-        // TODO
-//        System.out.println(res);
         serverStatistics.clear();
         return res;
     }
@@ -28,9 +24,7 @@ public abstract class Server {
         serverThreadExecutor.execute(() -> {
             try {
                 runServer(portNumber);
-                // TODO
-            } catch (IOException ignored) {
-            }
+            } catch (IOException ignored) {}
         });
     }
 

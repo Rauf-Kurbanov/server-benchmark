@@ -127,8 +127,8 @@ public class Controller extends Application {
             try {
                 final ServerArchitecture sa = (ServerArchitecture) architectureChoice.getValue();
 
-                runnerClient = new RunnerClient(serverAddress);
-                runnerClient.run(sa);
+                runnerClient = new RunnerClient(serverAddress, sa);
+                runnerClient.run();
 
                 final BenchmarkParameters bp = getBenchmarkParameters();
                 final BenchmarkRunner br = new BenchmarkRunner(new ClientServerFactory(sa), serverAddress);
