@@ -8,11 +8,11 @@ import ru.spbau.mit.server.ServerTester;
 import java.io.IOException;
 import java.net.InetAddress;
 
-public class SingleThreadServerTest extends ServerTester {
+public class TcpThreadPooledServerTest extends ServerTester {
 
     @Override
-    public Server getServer() {
-        return new UdpSingleThreadServer();
+    protected Server getServer() {
+        return new ThreadPooledServer();
     }
 
     @Override

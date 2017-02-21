@@ -7,12 +7,12 @@ import java.nio.ByteBuffer;
 import java.nio.channels.CompletionHandler;
 import java.util.concurrent.TimeUnit;
 
-public class ReadHandler implements CompletionHandler<Integer, Attachement> {
+public class ReadHandler implements CompletionHandler<Integer, Attachment> {
 
     private final RequestAnswerer requestAnswerer = new RequestAnswerer();
 
     @Override
-    public void completed(Integer result, Attachement attach) {
+    public void completed(Integer result, Attachment attach) {
         if (result == -1) {
             return;
         }
@@ -32,7 +32,7 @@ public class ReadHandler implements CompletionHandler<Integer, Attachement> {
                 final int dataSize = attach.getSizeBuffer().getInt();
                 final ByteBuffer dataBuffer = ByteBuffer.allocate(dataSize);
                 attach.setDataBuffer(dataBuffer);
-                attach.setState(Attachement.State.READ_DATA);
+                attach.setState(Attachment.State.READ_DATA);
                 attach.getClientChanel().read(dataBuffer, attach, new ReadHandler());
                 break;
             case READ_DATA:
@@ -54,7 +54,7 @@ public class ReadHandler implements CompletionHandler<Integer, Attachement> {
     }
 
     @Override
-    public void failed(Throwable exc, Attachement attachment) {
+    public void failed(Throwable exc, Attachment attachment) {
         System.err.println(exc.getMessage());
         exc.printStackTrace();
     }

@@ -12,7 +12,6 @@ import java.util.concurrent.TimeUnit;
 
 public class UdpClient extends Client {
 
-    // TODO maybe get rid ot these
     private final InetAddress serverAddress;
     private final int portNumber;
     private final int arraySize;
@@ -36,7 +35,6 @@ public class UdpClient extends Client {
 
     @Override
     public List<Integer> askToSort() throws IOException {
-        // TODO why
         final int[] arrToSort = Sorter.generateArr(arraySize);
         final byte[] buffer = new byte[1 << 16];
 

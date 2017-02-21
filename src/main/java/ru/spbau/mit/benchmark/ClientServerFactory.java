@@ -8,8 +8,8 @@ import ru.spbau.mit.client.UdpClient;
 import ru.spbau.mit.runner.ServerArchitecture;
 import ru.spbau.mit.server.Server;
 import ru.spbau.mit.server.tcp.NonBlockingServer;
-import ru.spbau.mit.server.tcp.SingleThreadServer;
-import ru.spbau.mit.server.tcp.ThreadPooledServer;
+import ru.spbau.mit.server.tcp.TcpSingleThreadServer;
+import ru.spbau.mit.server.tcp.TcpThreadPooledServer;
 import ru.spbau.mit.server.tcp.async.AsynchronousServer;
 import ru.spbau.mit.server.udp.UdpSingleThreadServer;
 
@@ -46,9 +46,9 @@ public class ClientServerFactory {
             case TCP_NON_BLOCKING:
                 return new NonBlockingServer();
             case TCP_SINGLE_THREAD:
-                return new SingleThreadServer();
+                return new TcpSingleThreadServer();
             case TCP_THREAD_POOLED:
-                return new ThreadPooledServer();
+                return new TcpThreadPooledServer();
             case UDP_SINGLE_THREAD:
                 return new UdpSingleThreadServer();
             case UDP_THREADPOOLED:

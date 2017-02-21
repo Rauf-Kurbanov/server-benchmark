@@ -9,11 +9,10 @@ import ru.spbau.mit.server.tcp.TimeStampingAttachment;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 
-import static ru.spbau.mit.server.tcp.async.handlers.Attachement.State.READ_SIZE;
+import static ru.spbau.mit.server.tcp.async.handlers.Attachment.State.READ_SIZE;
 
-// TODO consider refactoring
 @RequiredArgsConstructor
-public class Attachement extends TimeStampingAttachment {
+public class Attachment extends TimeStampingAttachment {
     @Getter
     private final AsynchronousSocketChannel clientChanel;
     @Getter

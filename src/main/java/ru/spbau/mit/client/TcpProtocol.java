@@ -9,8 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-// TODO split tcp and udp protocols
-public interface Protocol {
+public interface TcpProtocol {
 
     static void sendSortRequest(DataOutputStream out, int[] arrToSort) throws IOException {
         final List<Integer> iterable = IntStream.of(arrToSort).boxed().collect(Collectors.toList());
@@ -28,6 +27,4 @@ public interface Protocol {
         final FlyingDataProtos.FlyingData newFd = FlyingDataProtos.FlyingData.parseFrom(content);
         return newFd.getValueList();
     }
-
-
 }

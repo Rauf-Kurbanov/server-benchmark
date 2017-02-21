@@ -7,9 +7,9 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.util.concurrent.TimeUnit;
 
-public class WriteHandler implements CompletionHandler<Long, Attachement> {
+public class WriteHandler implements CompletionHandler<Long, Attachment> {
     @Override
-    public void completed(Long result, Attachement attach) {
+    public void completed(Long result, Attachment attach) {
         final AsynchronousSocketChannel channel = attach.getClientChanel();
         if (attach.getDataBuffer().hasRemaining()) {
             final ByteBuffer[] data = attach.getData();
@@ -19,12 +19,12 @@ public class WriteHandler implements CompletionHandler<Long, Attachement> {
         final ServerTimestamp st = attach.finishClientHandling();
         attach.getServerStatistics().pushStatistics(st);
 
-        final Attachement newAttach = new Attachement(channel, attach.getServerStatistics());
+        final Attachment newAttach = new Attachment(channel, attach.getServerStatistics());
         channel.read(attach.getSizeBuffer(), newAttach, new ReadHandler());
     }
 
     @Override
-    public void failed(Throwable exc, Attachement attachment) {
+    public void failed(Throwable exc, Attachment attachment) {
         System.err.println(exc.getMessage());
         exc.printStackTrace();
     }

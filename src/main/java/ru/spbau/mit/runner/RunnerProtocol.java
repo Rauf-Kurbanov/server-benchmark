@@ -28,7 +28,7 @@ public class RunnerProtocol {
         br.writeDelimitedTo(out);
     }
 
-    public static FlyingDataProtos.BenchmarkResult reciveBenchmarkResult(DataInputStream in) throws IOException {
+    public static FlyingDataProtos.BenchmarkResult receiveBenchmarkResult(DataInputStream in) throws IOException {
         return FlyingDataProtos.BenchmarkResult.parseDelimitedFrom(in);
     }
 
@@ -40,7 +40,7 @@ public class RunnerProtocol {
         output.writeInt(3);
     }
 
-    public static void recieveConfirmation(DataInputStream in) throws IOException {
+    public static void receiveConfirmation(DataInputStream in) throws IOException {
         final int status = in.readInt();
         if (status != 3) {
             throw new IOException("Wrong confirmation status");

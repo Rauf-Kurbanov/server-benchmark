@@ -2,10 +2,9 @@ package ru.spbau.mit;
 
 import java.util.Random;
 
-// TODO separate responsibilities for generating input and sorting
-public class Sorter {
+public interface Sorter {
 
-    public static void insertionSort(int[] arr) {
+    static void insertionSort(int[] arr) {
         for (int i = 1; i < arr.length; i++) {
             final int x = arr[i];
             int j = i - 1;
@@ -17,7 +16,7 @@ public class Sorter {
         }
     }
 
-    public static int[] generateArr(int size) {
+    static int[] generateArr(int size) {
         final Random rand = new Random();
         return rand.ints(0, size * 2).limit(size).toArray();
     }

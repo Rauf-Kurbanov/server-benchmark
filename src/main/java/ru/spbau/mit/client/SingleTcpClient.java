@@ -16,7 +16,7 @@ public class SingleTcpClient extends Client {
     private final int arraySize;
 
     public SingleTcpClient(InetAddress serverAddress, int portNumber
-            , int arraySize, int delayInMs, int nQueries) throws IOException {
+            , int arraySize, int delayInMs, int nQueries) {
         this.serverAddress = serverAddress;
         this.portNumber = portNumber;
         this.arraySize = arraySize;
@@ -28,7 +28,6 @@ public class SingleTcpClient extends Client {
         this(serverAddress, portNumber, bp.getArraySize(), bp.getDelayInMs(), bp.getNQueries());
     }
 
-    // TODO why sending array and receiving list?
     @Override
     public List<Integer> askToSort() throws IOException {
         final Socket socket = new Socket(serverAddress, portNumber);
@@ -36,8 +35,8 @@ public class SingleTcpClient extends Client {
         final DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 
         final int[] arrToSort = Sorter.generateArr(arraySize);
-        Protocol.sendSortRequest(out, arrToSort);
-        final List<Integer> res = Protocol.getSortResponse(in);
+        TcpProtocol.sendSortRequest(out, arrToSort);
+        final List<Integer> res = TcpProtocol.getSortResponse(in);
         socket.close();
         return res;
     }

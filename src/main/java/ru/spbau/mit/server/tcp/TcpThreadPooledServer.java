@@ -1,5 +1,6 @@
 package ru.spbau.mit.server.tcp;
 
+import lombok.RequiredArgsConstructor;
 import ru.spbau.mit.server.RequestAnswerer;
 import ru.spbau.mit.server.Server;
 import ru.spbau.mit.server.ServerTimestamp;
@@ -7,9 +8,13 @@ import ru.spbau.mit.server.ServerTimestamp;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-// TODO rename
-public class SingleThreadServer extends Server {
+@RequiredArgsConstructor
+public class TcpThreadPooledServer extends Server {
+
+    private final ExecutorService executor = Executors.newCachedThreadPool();
     private ServerSocket serverSocket;
     private final RequestAnswerer requestAnswerer = new RequestAnswerer();
 
@@ -19,10 +24,18 @@ public class SingleThreadServer extends Server {
         while (!serverSocket.isClosed()) {
             try {
                 final Socket clientSocket = serverSocket.accept();
-                    final ServerTimestamp st = requestAnswerer.answerServerQuery(clientSocket);
-                    serverStatistics.pushStatistics(st);
+                executor.execute(() -> {
+                    try {
+                        while (!clientSocket.isClosed()) {
+                            final ServerTimestamp st = requestAnswerer.answerServerQuery(clientSocket);
+                            serverStatistics.pushStatistics(st);
+                        }
+                    } catch (IOException ignored) {
+                    }
+                });
             } catch (IOException e) {
-                System.out.println("Cannot open client socket");
+                System.err.println("Can't answer server request");
+                System.err.println(e.getMessage());
             }
         }
     }
@@ -35,5 +48,6 @@ public class SingleThreadServer extends Server {
         } catch (IOException e) {
             throw new RuntimeException("Error closing server", e);
         }
+        executor.shutdownNow();
     }
 }

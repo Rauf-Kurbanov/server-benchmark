@@ -64,22 +64,18 @@ public class Controller extends Application {
         launch(args);
     }
 
-    private Stage primaryStage;
-
     @Override
     public void start(Stage primaryStage) {
-        this.primaryStage = primaryStage;
         try {
             final FXMLLoader loader = new FXMLLoader(getClass().getResource("/startwindow.fxml"));
             final VBox page = loader.load();
-            final Controller controller = loader.getController();
-//            controller.setup();
 
             final Scene scene = new Scene(page);
             primaryStage.setScene(scene);
             primaryStage.setTitle("Network performance");
             primaryStage.show();
         } catch (IOException e) {
+            System.err.println(e.getMessage());
         }
     }
 
@@ -146,11 +142,8 @@ public class Controller extends Application {
 
                 runnerClient.stop();
 
-            } catch (BrokenBarrierException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+            } catch (BrokenBarrierException | InterruptedException | IOException e) {
+                System.err.println(e.getMessage());
                 e.printStackTrace();
             }
         });

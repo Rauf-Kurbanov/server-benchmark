@@ -19,8 +19,6 @@ public class TcpClient extends Client {
     private final DataInputStream in;
     private final DataOutputStream out;
 
-    private static int retryTreshold = 3;
-
     public TcpClient(InetAddress serverAddress, int portNumber
             , int arraySize, int delayInMs, int nQueries) throws IOException, InterruptedException {
         this.arraySize = arraySize;
@@ -28,6 +26,7 @@ public class TcpClient extends Client {
         this.nQueries = nQueries;
 
         int retryCnt = 0;
+        int retryTreshold = 3;
         while (retryCnt++ < retryTreshold && socket == null) {
             try {
                 socket = new Socket(serverAddress, portNumber);
@@ -50,12 +49,11 @@ public class TcpClient extends Client {
         this(serverAddress, portNumber, bp.getArraySize(), bp.getDelayInMs(), bp.getNQueries());
     }
 
-    // TODO why sending array and receiving list?
     @Override
     public List<Integer> askToSort() throws IOException {
         final int[] arrToSort = Sorter.generateArr(arraySize);
-        Protocol.sendSortRequest(out, arrToSort);
-        final List<Integer> res = Protocol.getSortResponse(in);
+        TcpProtocol.sendSortRequest(out, arrToSort);
+        final List<Integer> res = TcpProtocol.getSortResponse(in);
         return res;
     }
 

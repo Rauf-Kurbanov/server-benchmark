@@ -15,7 +15,7 @@ public class AcceptHandler implements CompletionHandler<AsynchronousSocketChanne
     @Override
     public void completed(AsynchronousSocketChannel clientSC, AsynchronousServerSocketChannel serverSC) {
         serverSC.accept(serverSC, this);
-        final Attachement attach = new Attachement(clientSC, serverStatistics);
+        final Attachment attach = new Attachment(clientSC, serverStatistics);
         clientSC.read(attach.getSizeBuffer(), attach, new ReadHandler());
     }
 

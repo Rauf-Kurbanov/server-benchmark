@@ -16,8 +16,6 @@ import java.util.stream.IntStream;
 
 import static ru.mit.spbau.FlyingDataProtos.FlyingData;
 
-// TODO make everything static
-// TODO split responsibilities between RequestAnswerer and Protocol
 public class RequestAnswerer {
 
     public FlyingData getAnswer(byte[] content) throws InvalidProtocolBufferException {
@@ -34,15 +32,14 @@ public class RequestAnswerer {
                 .build();
     }
 
-    // TODO use decorator
     public ServerTimestamp answerServerQuery(DatagramSocket socket) throws IOException {
         final long clientStartTime = System.nanoTime();
 
         final byte[] oldContent = new byte[socket.getReceiveBufferSize()];
-        final DatagramPacket recievedPacket = new DatagramPacket(oldContent , socket.getReceiveBufferSize());
-        socket.receive(recievedPacket);
+        final DatagramPacket receivedPacket = new DatagramPacket(oldContent , socket.getReceiveBufferSize());
+        socket.receive(receivedPacket);
 
-        final ByteBuffer buffer = ByteBuffer.wrap(recievedPacket.getData());
+        final ByteBuffer buffer = ByteBuffer.wrap(receivedPacket.getData());
         final int length = buffer.getInt();
 
         final byte[] content = new byte[length];
@@ -61,12 +58,11 @@ public class RequestAnswerer {
         wrapper.put(fd.toByteArray());
         packetToSend.setData(wrapper.array());
 
-        packetToSend.setAddress(recievedPacket.getAddress());
-        packetToSend.setPort(recievedPacket.getPort());
+        packetToSend.setAddress(receivedPacket.getAddress());
+        packetToSend.setPort(receivedPacket.getPort());
         socket.send(packetToSend);
 
         final long clientProcessingTime = System.nanoTime() - clientStartTime;
-//        return ServerTimestamp.fromNano(requestProcessingTime, clientProcessingTime);
         return new ServerTimestamp(requestProcessingTime, clientProcessingTime);
     }
 
@@ -88,7 +84,6 @@ public class RequestAnswerer {
         dos.write(newFd.toByteArray());
 
         final long clientProcessingTime = System.nanoTime() - clientStartTime;
-//        return new ServerTimestamp(requestProcessingTime, clientProcessingTime);
         return new ServerTimestamp(requestProcessingTime, clientProcessingTime);
     }
 

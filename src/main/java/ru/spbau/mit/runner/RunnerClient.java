@@ -23,15 +23,14 @@ public class RunnerClient {
         out = new DataOutputStream(socket.getOutputStream());
     }
 
-    // TODO future
     public void run() throws IOException {
         RunnerProtocol.sendConnectionRequest(out, serverArchitecture);
-        RunnerProtocol.recieveConfirmation(in);
+        RunnerProtocol.receiveConfirmation(in);
     }
 
     public FlyingDataProtos.BenchmarkResult askStatistics() throws IOException {
         RunnerProtocol.sendBenchmarkRequest(out);
-        return RunnerProtocol.reciveBenchmarkResult(in);
+        return RunnerProtocol.receiveBenchmarkResult(in);
     }
 
     public void stop() throws IOException {

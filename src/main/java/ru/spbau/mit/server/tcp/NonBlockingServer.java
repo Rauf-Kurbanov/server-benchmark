@@ -66,7 +66,6 @@ public class NonBlockingServer extends Server {
         final ChannelAttachment context = (ChannelAttachment) key.attachment();
         switch (context.getState()) {
             case READ_SIZE:
-                // TODO why do you close chanel here but assume it closes itself in async server
                 final int readCount = channel.read(context.getSizeBuffer());
                 if (readCount == -1) {
                     key.cancel();

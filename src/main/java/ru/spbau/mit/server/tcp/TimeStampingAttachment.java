@@ -6,7 +6,6 @@ public class TimeStampingAttachment {
     private volatile long requestHandlingStart = -1;
     private volatile long clientHandlingStart = -1;
     private volatile long requestHandlingDuration;
-    private volatile long clientHandlingDuration;
 
     public void startRequestHandling() {
         if (requestHandlingStart == -1) {
@@ -25,7 +24,7 @@ public class TimeStampingAttachment {
     }
 
     public ServerTimestamp finishClientHandling() {
-        clientHandlingDuration = System.nanoTime() - clientHandlingStart;
+        long clientHandlingDuration = System.nanoTime() - clientHandlingStart;
         return new ServerTimestamp(requestHandlingDuration, clientHandlingDuration);
     }
 }

@@ -1,23 +1,23 @@
-package ru.spbau.mit.server.udp;
+package ru.spbau.mit.server.tcp;
 
 import ru.spbau.mit.client.Client;
-import ru.spbau.mit.client.UdpClient;
+import ru.spbau.mit.client.SingleTcpClient;
 import ru.spbau.mit.server.Server;
 import ru.spbau.mit.server.ServerTester;
 
 import java.io.IOException;
 import java.net.InetAddress;
 
-public class ThreadPooledServerTest extends ServerTester {
+public class TcpSingleThreadServerTest extends ServerTester {
 
     @Override
     protected Server getServer() {
-        return new ThreadPooledServer();
+        return new TcpSingleThreadServer();
     }
 
     @Override
     protected Client getClient(InetAddress serverAddress, int port, int arraySize
             , int delayInMs, int nQueries) throws IOException {
-        return new UdpClient(serverAddress, port, arraySize, delayInMs, nQueries);
+        return new SingleTcpClient(serverAddress, port, arraySize, delayInMs, nQueries);
     }
 }

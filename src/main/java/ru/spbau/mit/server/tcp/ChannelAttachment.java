@@ -1,9 +1,11 @@
 package ru.spbau.mit.server.tcp;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.nio.ByteBuffer;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class ChannelAttachment extends TimeStampingAttachment {
     private final ByteBuffer sizeBuffer = ByteBuffer.allocate(4);

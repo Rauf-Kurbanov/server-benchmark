@@ -57,7 +57,7 @@ public class ServerRunner {
             case 1:
                 log.info("handling connect");
                 final ServerArchitecture sa = RunnerProtocol.receiveConnectionRequest(in);
-                log.info("strating " + sa);
+                log.info("starting " + sa);
                 testedServer = new ClientServerFactory(sa).getServer();
                 testedServer.start(RunnerProtocol.TESTED_SERVER_PORT);
                 RunnerProtocol.sendConfirmation(out);

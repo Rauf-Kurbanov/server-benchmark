@@ -12,7 +12,6 @@ import java.util.stream.IntStream;
 
 public interface UdpProtocol {
 
-    // TODO reuse TcpProtocol code
     static void sendSortRequest(DatagramSocket socket, int[] arrToSort, DatagramPacket datagramPacket) throws IOException {
         final List<Integer> iterable = IntStream.of(arrToSort).boxed().collect(Collectors.toList());
         final FlyingDataProtos.FlyingData fd = FlyingDataProtos.FlyingData
