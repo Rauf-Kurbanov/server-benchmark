@@ -27,7 +27,7 @@ public class ClientServerFactory {
                 return new TcpClient(serverAddress, port, bp);
             case TCP_NON_BLOCKING:
                 return new TcpClient(serverAddress, port, bp);
-            case TCP_SIGNLE_THREAD:
+            case TCP_SINGLE_THREAD:
                 return new SingleTcpClient(serverAddress, port, bp);
             case TCP_THREAD_POOLED:
                 return new TcpClient(serverAddress, port, bp);
@@ -45,7 +45,7 @@ public class ClientServerFactory {
                 return new AsynchronousServer();
             case TCP_NON_BLOCKING:
                 return new NonBlockingServer();
-            case TCP_SIGNLE_THREAD:
+            case TCP_SINGLE_THREAD:
                 return new SingleThreadServer();
             case TCP_THREAD_POOLED:
                 return new ThreadPooledServer();
